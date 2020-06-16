@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: monitoring-env-dep
+spec:
+  selector:
+    matchLabels:
+      pod: prom-graf-pod
+
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        pod: prom-graf-pod
+
+    spec:
+      containers:
+      - name: prometheus 
+        image: jhagdu/ubuntu_prometheus:v3
+
+        ports:
+        - containerPort: 9090
+
+        volumeMounts:
+          - name: prom-vol
+            mountPath: /data/
+
+
+      - name: grafana
+        image: grafana/grafana
+
+        ports:
+        - containerPort: 3000
+
+        volumeMounts:
+          - name: graf-vol
+            mountPath: /var/lib/grafana/
+
+      volumes:
+      - name: prom-vol
+        persistentVolumeClaim:
+          claimName: prometheus-pvc
+
+      - name: graf-vol
+        persistentVolumeClaim:
+          claimName: grafana-pvc 
+
